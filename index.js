@@ -1,8 +1,9 @@
 import 'dotenv/config'
+import fetch from 'node-fetch'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { getRandom } from 'random-useragent'
-import { sleep } from './utils'
+import { sleep } from './utils.js'
 
 const launchPuppeteer = async () => {
   puppeteer.use(StealthPlugin())
@@ -67,34 +68,57 @@ const auth = async () => {
   return { page, browser }
 }
 
-const getData = async () => {
-  const { data } = await (
-    await fetch('https://backend.frontendmentor.io/rest/v2/solutions?page=1')
-  ).json()
+const getFullData = async () => {
+  const fullData = []
 
-  const filterAndModifyData = data.map(({ slug, repoURL }) => ({
-    url: `https://frontendmentor.io/solutions/${slug}`,
-    user: repoURL.split('/')[3],
-  }))
+  for (let i = 1; i <= 10; i++) {
+    await sleep(500)
+    const { data } = await (
+      await fetch(
+        `https://backend.frontendmentor.io/rest/v2/solutions?page=${i}`
+      )
+    ).json()
+    fullData.push(...data)
+  }
+
+  console.log('----------------------------')
+  console.log('----------------------------')
+  console.log('----------------------------')
+  console.log('----------------------------')
+
+  return fullData
+}
+
+const getData = async () => {
+  const filterAndModifyData = (await getFullData())
+    .map(({ slug, repoURL, comments }) => {
+      // ignore if already commented
+      if (comments.includes('6210dfaa145c6a78f01599f3')) return null
+
+      return {
+        url: `https://frontendmentor.io/solutions/${slug}`,
+        user: repoURL.split('/')[3],
+      }
+    })
+    .filter(Boolean)
 
   return filterAndModifyData
 }
 
 ;(async function main() {
-  const { browser, page } = await auth()
+  ;(await getData()).forEach(({ url, user }) => {
+    console.log(`Hey @${user}, you did a great job!`)
+  })
 
-  await page.goto(
-    'https://www.frontendmentor.io/solutions/rest-country-finder-y8glEosLZ'
-  )
+  // const { browser, page } = await auth()
 
-  const [el] = await page.$x(
-    '/html/body/div[1]/div[3]/div[2]/div[2]/section/div/form/div/div/textarea'
-  )
-  await el.type('great job!')
-
-  console.log('typed')
-
-  // await page.type('#feedback form textarea', 'great job', { delay: 100 })
+  // await page.goto(
+  //   'https://www.frontendmentor.io/solutions/rest-country-finder-y8glEosLZ'
+  // )
+  // const [el] = await page.$x(
+  //   '/html/body/div[1]/div[3]/div[2]/div[2]/section/div/form/div/div/textarea'
+  // )
+  // await el.type('great job!')
 
   // await browser.close()
 })()
