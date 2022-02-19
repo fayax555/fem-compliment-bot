@@ -72,7 +72,7 @@ const auth = async () => {
 const getFullData = async () => {
   const fullData = []
 
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 2; i++) {
     await sleep(500)
     const { data } = await (
       await fetch(
@@ -97,7 +97,7 @@ const getData = async () => {
       if (comments.includes('6210dfaa145c6a78f01599f3')) return null
 
       return {
-        url: `https://frontendmentor.io/solutions/${slug}`,
+        solutionUrl: `https://frontendmentor.io/solutions/${slug}`,
         user: repoURL.split('/')[3],
       }
     })
@@ -107,19 +107,20 @@ const getData = async () => {
 }
 
 ;(async function main() {
-  ;(await getData()).forEach(({ url, user }) => {
+  const { browser, page } = await auth()
+
+  const data = await getData()
+
+  for (let i = 0; i < data.length; i++) {
+    const { solutionUrl, user } = data[i]
+    await page.goto(solutionUrl)
+    const [el] = await page.$x(
+      '/html/body/div[1]/div[3]/div[2]/div[2]/section/div/form/div/div/textarea'
+    )
     console.log(`Hey @${user}, ${getRandomCompliment()}`)
-  })
+    await el.type(`Hey @${user}, ${getRandomCompliment()}`)
+    await sleep(1000)
+  }
 
-  // const { browser, page } = await auth()
-
-  // await page.goto(
-  //   'https://www.frontendmentor.io/solutions/rest-country-finder-y8glEosLZ'
-  // )
-  // const [el] = await page.$x(
-  //   '/html/body/div[1]/div[3]/div[2]/div[2]/section/div/form/div/div/textarea'
-  // )
-  // await el.type('great job!')
-
-  // await browser.close()
+  await browser.close()
 })()
