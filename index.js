@@ -4,6 +4,7 @@ import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { getRandom } from 'random-useragent'
 import { sleep } from './utils.js'
+import { getRandomCompliment } from './compliment.js'
 
 const launchPuppeteer = async () => {
   puppeteer.use(StealthPlugin())
@@ -107,7 +108,7 @@ const getData = async () => {
 
 ;(async function main() {
   ;(await getData()).forEach(({ url, user }) => {
-    console.log(`Hey @${user}, you did a great job!`)
+    console.log(`Hey @${user}, ${getRandomCompliment()}`)
   })
 
   // const { browser, page } = await auth()
