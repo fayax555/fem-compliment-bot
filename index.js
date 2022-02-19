@@ -72,7 +72,7 @@ const auth = async () => {
 const getFullData = async () => {
   const fullData = []
 
-  for (let i = 1; i <= 2; i++) {
+  for (let i = 1; i <= 10; i++) {
     await sleep(500)
     const { data } = await (
       await fetch(
@@ -82,26 +82,16 @@ const getFullData = async () => {
     fullData.push(...data)
   }
 
-  console.log('----------------------------')
-  console.log('----------------------------')
-  console.log('----------------------------')
-  console.log('----------------------------')
-
   return fullData
 }
 
 const getData = async () => {
-  const filterAndModifyData = (await getFullData())
-    .map(({ slug, repoURL, comments }) => {
-      // ignore if already commented
-      if (comments.includes('6210dfaa145c6a78f01599f3')) return null
-
-      return {
-        solutionUrl: `https://frontendmentor.io/solutions/${slug}`,
-        user: repoURL.split('/')[3],
-      }
+  const filterAndModifyData = (await getFullData()).map(
+    ({ slug, repoURL }) => ({
+      solutionUrl: `https://frontendmentor.io/solutions/${slug}`,
+      user: repoURL.split('/')[3],
     })
-    .filter(Boolean)
+  )
 
   return filterAndModifyData
 }
@@ -119,6 +109,7 @@ const getData = async () => {
     )
     console.log(`Hey @${user}, ${getRandomCompliment()}`)
     await el.type(`Hey @${user}, ${getRandomCompliment()}`)
+    await page.click('#feedback > form > div > button')
     await sleep(1000)
   }
 
